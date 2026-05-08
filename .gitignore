@@ -1,0 +1,35 @@
+# ========================
+# Maven Build Output
+# ========================
+target/
+*.jar
+*.war
+*.ear
+
+# ========================
+# Java
+# ========================
+*.class
+*.log
+
+# ========================
+# IDE — IntelliJ / Cursor
+# ========================
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+*.code-workspace
+
+# ========================
+# OS
+# ========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ========================
+# Projektspezifisch
+# ========================
+data/highscores.txt
