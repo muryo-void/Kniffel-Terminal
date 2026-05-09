@@ -9,7 +9,14 @@ public class GameController {
     private int playersCount = 1;
     private int activePlayer = 0;
     private int currentRound = 1;
-    private int rollsLeft = 3;
+    
+    private DiceController dice;
+    private int selIdx = 0;
+
+    // --- KONSTRUKTOR ---
+    public GameController() {
+        dice = new DiceController(); 
+    }
 
     public void startGame() {
         while(currentState != ScreenState.EXIT) {
@@ -27,64 +34,81 @@ public class GameController {
 
     private void handleStartScreen() {
         ConsoleRender.drawStartScreen();
-        String input = InputHandler.readInput().toUpperCase();
-        if (input.equals("S")) {
+        String in = InputHandler.readInput().toUpperCase();
+        if (in.equals("S")) {
             currentRound = 1;
             activePlayer = 0;
             currentState = ScreenState.SETUP;
-        } else if (input.equals("H")) currentState = ScreenState.HIGHSCORES;
-        else if (input.equals("Q")) currentState = ScreenState.EXIT;
+        } else if (in.equals("H")) currentState = ScreenState.HIGHSCORES;
+        else if (in.equals("Q")) currentState = ScreenState.EXIT;
     }
 
     private void handleSetupScreen() {
         String[] names = {"", "", "", ""};
         int field = 0;
-
         while (currentState == ScreenState.SETUP) {
             ConsoleRender.drawSetupScreen(playersCount, field, names);
             String input = InputHandler.readInput(); 
-
             switch (input) {
                 case "1","2","3","4" -> playersCount = Integer.parseInt(input);
                 case "UP" -> { if (field > 0) field--; }
                 case "DOWN" -> { if (field < playersCount - 1) field++; }
-                case "\r", "\n" -> { // Start
+                case "\r", "\n" -> {
                     players = new Player[playersCount];
                     for (int i = 0; i < playersCount; i++) {
-                        players[i] = new Player(names[i].isEmpty() ? "Spieler " + (i+1) : names[i]);
+                        players[i] = new Player(names[i].isEmpty() ? "P" + (i+1) : names[i]);
                     }
-                    rollsLeft = 3;
+                    dice.reset();
                     currentState = ScreenState.GAME;
                 }
                 case "ESC" -> currentState = ScreenState.START;
-                case "\b", "\177" -> { // Backspace
+                case "\b", "\177" -> {
                     if (!names[field].isEmpty()) names[field] = names[field].substring(0, names[field].length()-1);
                 }
                 default -> {
-                    if (input.length() == 1 && names[field].length() < 15) names[field] += input;
+                    if (input.length() == 1 && names[field].length() < 10) names[field] += input;
                 }
             }
         }
     }
 
     private void handleGameScreen() {
-        ConsoleRender.drawGameScreen(players[activePlayer].getName(), currentRound, rollsLeft);
-        String input = InputHandler.readInput().toUpperCase(); 
-        if (input.equals("R") && rollsLeft > 0) rollsLeft--;
-        else if (input.equals("\r") || input.equals("\n")) currentState = ScreenState.SCORE_ENTRY;
-        else if (input.equals("Q")) currentState = ScreenState.START;
+        dice.roll();
+        while(currentState == ScreenState.GAME) {
+            ConsoleRender.drawGameScreen(players[activePlayer], currentRound, dice);
+            String in = InputHandler.readInput().toUpperCase(); 
+            switch (in) {
+                case "1","2","3","4","5" -> dice.toggle(Integer.parseInt(in) - 1);
+                case "R" -> dice.roll();
+                case "\r", "\n" -> { selIdx = 0; currentState = ScreenState.SCORE_ENTRY; }
+                case "Q" -> currentState = ScreenState.START;
+            }
+        }
     }
 
     private void handleScoreScreen() {
-        ConsoleRender.drawScoreScreen(players[activePlayer].getName());
-        String input = InputHandler.readInput();
-        if (input.equals("\r") || input.equals("\n")) checkNextTurn();
-        else if (input.equalsIgnoreCase("Q")) currentState = ScreenState.GAME;
+        Scorecard.Cat[] cats = Scorecard.Cat.values();
+        Player p = players[activePlayer];
+        ConsoleRender.drawScoreScreen(p, dice.getV(), selIdx);
+        
+        String in = InputHandler.readInput();
+        switch (in) {
+            case "UP" -> { if (selIdx > 0) selIdx--; }
+            case "DOWN" -> { if (selIdx < cats.length - 1) selIdx++; }
+            case "\r", "\n" -> {
+                if (!p.getSc().has(cats[selIdx])) {
+                    int val = p.getSc().calc(cats[selIdx], dice.getV());
+                    p.getSc().set(cats[selIdx], val);
+                    dice.reset();
+                    checkNextTurn();
+                }
+            }
+            case "Q", "q" -> currentState = ScreenState.GAME;
+        }
     }
 
     private void checkNextTurn() {
         activePlayer++;
-        rollsLeft = 3;
         if (activePlayer >= playersCount) {
             activePlayer = 0;
             currentRound++;
@@ -94,9 +118,7 @@ public class GameController {
 
     private void handleEndScreen() {
         ConsoleRender.drawEndScreen(players[0].getName());
-        String input = InputHandler.readInput().toUpperCase();
-        if (input.equals("N")) currentState = ScreenState.SETUP;
-        else if (input.equals("Q")) currentState = ScreenState.START;
+        if (InputHandler.readInput().equalsIgnoreCase("Q")) currentState = ScreenState.START;
     }
 
     private void handleHighscores() {
