@@ -1,4 +1,5 @@
 package kniffel.com;
+import java.util.List;
 
 public class GameController {
 
@@ -117,12 +118,27 @@ public class GameController {
     }
 
     private void handleEndScreen() {
-        ConsoleRender.drawEndScreen(players[0].getName());
-        if (InputHandler.readInput().equalsIgnoreCase("Q")) currentState = ScreenState.START;
+        // Scores werden gespeichert
+        for (Player p : players) {
+            HighscoreManager.save(p.getName(), p.getSc().total());
+        }
+
+        // Gewinner
+        Player win = players[0];
+        for (Player p : players) {
+            if (p.getSc().total() > win.getSc().total()) win = p;
+        }
+
+        ConsoleRender.drawEndScreen(win.getName());
+        
+        String in = InputHandler.readInput().toUpperCase();
+        if (in.equals("N")) currentState = ScreenState.SETUP;
+        else if (in.equals("Q")) currentState = ScreenState.START;
     }
 
     private void handleHighscores() {
-        ConsoleRender.drawStub("HIGHSCORES\n[Taste] Zurück");
+        List<String> tops = HighscoreManager.getTop();
+        ConsoleRender.drawHighscoreScreen(tops);
         InputHandler.readInput();
         currentState = ScreenState.START;
     }

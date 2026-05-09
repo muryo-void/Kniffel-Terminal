@@ -39,6 +39,31 @@ public class Scorecard {
         return false;
     }
 
+    public int total() {
+        int oben = 0;
+        int unten = 0;
+
+        // Kategorien 
+        for (Cat c : Cat.values()) {
+            Integer s = map.get(c);
+            if (s == null) continue;
+
+            // oberer Teil (1 - 6)
+            if (c.ordinal() < 6) {
+                oben += s;
+            } else {
+                unten += s;
+            }
+        }
+
+        // Bonus-Check
+        if (oben >= 63) {
+            oben += 35;
+        }
+
+        return oben + unten;
+    }
+
     public void set(Cat c, int v) { map.put(c, v); }
     public boolean has(Cat c) { return map.containsKey(c); }
     public Integer get(Cat c) { return map.get(c); }

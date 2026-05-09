@@ -53,6 +53,20 @@ public class ConsoleRender {
         System.out.println("\n[UP/DOWN] Wahl  [ENTER] Bestätigen");
     }
 
+    public static void drawHighscoreScreen(java.util.List<String> scores) {
+        clearScreen();
+        System.out.println("--- TOP 5 HIGHSCORES ---");
+        if (scores.isEmpty()) {
+            System.out.println("\nNoch keine Einträge!");
+        } else {
+            for (int i = 0; i < scores.size(); i++) {
+                String[] parts = scores.get(i).split(":");
+                System.out.printf("%d. %-10s : %s Pkt\n", (i+1), parts[0], parts[1]);
+            }
+        }
+        System.out.println("\n[Taste] Zurück zum Menü");
+    }
+
     public static void drawEndScreen(String winner) {
         clearScreen();
         System.out.println("--- GAME OVER ---");
