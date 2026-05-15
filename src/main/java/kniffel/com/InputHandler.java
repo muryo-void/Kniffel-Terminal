@@ -29,10 +29,10 @@ public class InputHandler {
             int code = reader.read();
             if (code == -1) return "";
 
-            // Wenn es ein Escape-Zeichen ist (27)
+            
             if (code == 27) {
-                // Schau kurz nach, ob weitere Zeichen folgen (Pfeiltasten-Sequenz)
-                int next1 = reader.read(10L); // 10ms warten
+                // Pfeiltasten-Sequenz
+                int next1 = reader.read(10L); 
                 int next2 = reader.read(10L);
             
                 if (next1 == '[') {
@@ -44,7 +44,7 @@ public class InputHandler {
                         default -> "ESC_SEQ"; 
                     };
                 }
-                return "ESC"; // Nur die ESC-Taste gedrückt
+                return "ESC"; // ESC-Taste gedrückt
             }
 
             return String.valueOf((char) code);

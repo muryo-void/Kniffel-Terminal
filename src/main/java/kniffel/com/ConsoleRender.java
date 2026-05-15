@@ -24,7 +24,6 @@ public class ConsoleRender {
     }
 
     public static void moveCursor(int row, int col) {
-        // Die Koordinaten sind nun so gesetzt, dass row 1 und col 1 immer leer bleiben
         System.out.print("\033[" + row + ";" + col + "H");
     }
 
@@ -202,7 +201,7 @@ public class ConsoleRender {
         for(int i=0; i<5; i++) {
             String[] face = getDiceFace(v[i], h[i]);
             for(int line=0; line<5; line++) {
-                moveCursor(10 + line, 41 + i*11); // Vorher 9 + line, 40 + i*11
+                moveCursor(10 + line, 41 + i*11); 
                 System.out.print(face[line]);
             }
         }
