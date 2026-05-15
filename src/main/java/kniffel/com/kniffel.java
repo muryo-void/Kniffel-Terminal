@@ -2,11 +2,11 @@ package kniffel.com;
 
 public class kniffel {
     public static void main(String[] args) throws InterruptedException {
-        // Terminal Setup
-        System.out.print("\033[8;40;102t\033[?25l"); 
+        System.out.print("\033[3m\033[?25l");
         System.out.flush();
-        
-        // Cursor wieder an
+
+        Thread.sleep(150);
+
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.print("\033[?25h");
             System.out.flush();
